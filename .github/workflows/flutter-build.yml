@@ -2588,8 +2588,8 @@ jobs:
         # once FLUTTER_VERSION moves to 3.44.x (qr_code_scanner + fonts, see script).
         shell: bash
         run: |
-          if [[ "${{ env.FLUTTER_VERSION }}" == 3.44.* ]]; then
-            bash .github/patches/apply_flutter_3.44_web_patches.sh
+          if [[ "${{ env.FLUTTER_VERSION }}" == 3.47.5 ]]; then
+            bash .github/patches/apply_flutter_3.47.5_web_patches.sh
           fi
 
       # https://rustdesk.com/docs/en/dev/build/web/
