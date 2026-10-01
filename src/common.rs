@@ -1159,7 +1159,7 @@ fn get_api_server_(api: String, custom: String) -> String {
             return format!("http://{}", s);
         }
     }
-    "https://193.108.114.201".to_owned()
+    "https://connect.vega-it.ru".to_owned()
 }
 
 #[inline]
