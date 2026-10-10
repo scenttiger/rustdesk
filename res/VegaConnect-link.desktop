@@ -1,11 +1,11 @@
 [Desktop Entry]
-Name=RustDesk
+Name=VegaConnect
 NoDisplay=true
-MimeType=x-scheme-handler/rustdesk;
-TryExec=rustdesk
-Exec=rustdesk %u
-Icon=rustdesk
+MimeType=x-scheme-handler/VegaConnect;
+TryExec=VegaConnect
+Exec=VegaConnect %u
+Icon=VegaConnect
 Terminal=false
 Type=Application
 StartupNotify=false
-StartupWMClass=rustdesk
+StartupWMClass=VegaConnect

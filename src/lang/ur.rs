@@ -44,7 +44,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("id_change_tip", "صرف a-z، A-Z، 0-9، - (ڈیش) اور _ (انڈر اسکور) حروف کی اجازت ہے۔ پہلا حرف a-z یا A-Z ہونا چاہیے۔ لمبائی 6 سے 16 کے درمیان ہو۔"),
         ("Website", "ویب سائٹ"),
         ("About", "کے بارے میں"),
-        ("Slogan_tip", "سلوگن_ٹپ"),
+        ("Slogan_tip", "سلوگن_ٹپہم دنیا کو مزید قابل رسائی بنا رہے ہیں"),
         ("Privacy Statement", "رازداری کا بیان"),
         ("Mute", "خاموش"),
         ("Build Date", "بنیاد کی تاریخ"),

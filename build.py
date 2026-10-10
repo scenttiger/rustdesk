@@ -1000,7 +1000,7 @@ def build_flutter_windows(version, features, skip_portable_pack):
                   './VegaConnect_portable.exe')
     print(
         f'output location: {os.path.abspath(os.curdir)}/VegaConnect_portable.exe')
-    os.rename('./VegaConnect_portable.exe', f'./VegaConnect-{version}-install.exe')
+    os.replace('./VegaConnect_portable.exe', f'./VegaConnect-{version}-install.exe')
     print(
         f'output location: {os.path.abspath(os.curdir)}/VegaConnect-{version}-install.exe')
 
