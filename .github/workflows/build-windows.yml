@@ -7,7 +7,6 @@ env:
   RUST_VERSION: "1.75"
   FLUTTER_VERSION: "3.22.2"
   FLUTTER_RUST_BRIDGE_VERSION: "1.80.1"
-  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
   VCPKG_COMMIT_ID: "9e593bb18ea69cc5095e012465dcd675a822ed0d"
   VERSION: "1.5.0"
   RENDEZVOUS_SERVER: "${{ secrets.RENDEZVOUS_SERVER }}"
@@ -35,11 +34,7 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install LLVM
-        run: |
-          choco install llvm --version=15.0.6 -y
-
-      - name: Install vcpkg
+      - name: Install vcpkg deps
         run: |
           git clone https://github.com/microsoft/vcpkg C:\vcpkg
           cd C:\vcpkg
@@ -50,6 +45,10 @@ jobs:
 
       - name: Install flutter_rust_bridge_codegen
         run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --locked
+
+      - name: Generate bridge
+        working-directory: flutter
+        run: flutter_rust_bridge_codegen generate
 
       - name: Build Rust
         env:
