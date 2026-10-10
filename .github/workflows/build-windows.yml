@@ -61,11 +61,22 @@ jobs:
         shell: bash
 
       - name: Install flutter_rust_bridge_codegen
-        run: cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --locked
+        run: |
+          cargo install cargo-expand --version 1.0.95 --locked
+          cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --features "uuid" --locked
+        shell: bash
+
+      - name: Flutter pub get
+        working-directory: flutter
+        run: flutter pub get
 
       - name: Generate bridge
-        working-directory: flutter
-        run: flutter_rust_bridge_codegen generate
+        run: |
+          $USERPROFILE/.cargo/bin/flutter_rust_bridge_codegen `
+            --rust-input ./src/flutter_ffi.rs `
+            --dart-output ./flutter/lib/generated_bridge.dart `
+            --c-output ./flutter/macos/Runner/bridge_generated.h
+        shell: pwsh
 
       - name: Build Rust
         env:
