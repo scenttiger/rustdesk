@@ -16,7 +16,7 @@ import '../common.dart';
 
 final syncAbOption = 'sync-ab-with-recent-sessions';
 bool shouldSyncAb() {
-  return bind.mainGetLocalOption(key: syncAbOption) == 'Y';
+  return bind.mainGetLocalOption(key: syncAbOption) != 'N';
 }
 
 final sortAbTagsOption = 'sync-ab-tags';
