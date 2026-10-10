@@ -5,7 +5,7 @@ on:
 
 env:
   RUST_VERSION: "1.75"
-  FLUTTER_VERSION: "3.22.2"
+  FLUTTER_VERSION: "3.22.3"
   FLUTTER_RUST_BRIDGE_VERSION: "1.80.1"
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
   VCPKG_COMMIT_ID: "9e593bb18ea69cc5095e012465dcd675a822ed0d"
@@ -66,9 +66,12 @@ jobs:
           cargo install flutter_rust_bridge_codegen --version ${{ env.FLUTTER_RUST_BRIDGE_VERSION }} --features "uuid" --locked
         shell: bash
 
-      - name: Flutter pub get
+      - name: Patch pubspec for Flutter 3.22.3
         working-directory: flutter
-        run: flutter pub get
+        shell: bash
+        run: |
+          sed -i -e 's/extended_text: 14.0.0/extended_text: 13.0.0/g' pubspec.yaml
+          flutter pub get
 
       - name: Generate bridge
         run: |
