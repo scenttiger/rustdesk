@@ -31,6 +31,7 @@ jobs:
             liblzma-dev libstdc++-12-dev nasm \
             libssl-dev libxcb-randr0-dev libxdo-dev \
             libxfixes-dev libasound2-dev libxcb-shm0-dev \
+            libunwind-dev libdw-dev \
             libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
             libgstreamer-plugins-bad1.0-dev \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
