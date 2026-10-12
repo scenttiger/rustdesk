@@ -1,0 +1,60 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Build Windows x64
+    uses: ./.github/workflows/build-windows.yml
+    secrets: inherit
+
+  linux:
+    name: Build Linux x86_64
+    uses: ./.github/workflows/build-linux.yml
+    secrets: inherit
+
+  publish:
+    name: Publish GitHub Release
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows portable
+        uses: actions/download-artifact@v4
+        with:
+          name: vegaconnect-windows-x64-portable
+          path: dist/windows-portable/
+
+      - name: Download Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: vegaconnect-windows-x64-installer
+          path: dist/windows-installer/
+
+      - name: Download Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: vegaconnect-linux-x64
+          path: dist/linux/
+
+      - name: Package Windows portable into ZIP
+        run: |
+          cd dist/windows-portable
+          zip -r ../VegaConnect-windows-portable.zip .
+          cd ../..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/VegaConnect-windows-portable.zip
+            dist/windows-installer/*.exe
+            dist/linux/*.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: false
