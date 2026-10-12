@@ -92,9 +92,25 @@ jobs:
         working-directory: flutter
         run: flutter build windows --release
 
-      - name: Upload artifact
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+        shell: cmd
+
+      - name: Build installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" res\vegaconnect.iss
+        shell: pwsh
+
+      - name: Upload portable folder
         uses: actions/upload-artifact@v4
         with:
-          name: vegaconnect-windows-x64
+          name: vegaconnect-windows-x64-portable
           path: flutter/build/windows/x64/runner/Release/
+          retention-days: 7
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: vegaconnect-windows-x64-installer
+          path: dist/VegaConnect-Setup-*.exe
           retention-days: 7
