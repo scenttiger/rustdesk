@@ -49,7 +49,7 @@ Name: "autostart"; Description: "Запускать VegaConnect при вход�
 Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; VegaConnect: cleanup-vegaconnect.bat запаковывается, но НЕ копируется на диск при установке.
 ; Извлекается во временную папку и запускается деинсталлятором (см. [Code] ниже).
-Source: "cleanup-vegaconnect.bat"; Flags: dontcopy
+Source: "cleanup-vegaconnect.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
@@ -86,22 +86,35 @@ Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppNa
     - записи RustDesk и VegaConnect в Uninstall, Software, Run, Services;
     - службы, firewall-правила, scheduled tasks.
   См. res/cleanup-vegaconnect.bat. }
+{ VegaConnect: очистка следов после удаления.
+  ВАЖНО: ExtractTemporaryFile работает ТОЛЬКО на этапе установки.
+  На uninstall используем двухфазную схему:
+    1) usUninstall — файлы ещё на месте, копируем .bat в {tmp};
+    2) usPostUninstall — Inno уже удалил {app}, запускаем .bat из {tmp}.
+  Это фиксит ошибку "Cannot call ExtractTemporaryFile function during Uninstall". }
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   ResultCode: Integer;
-  BatPath: String;
+  SrcBat: String;
+  TmpBat: String;
 begin
-  if CurUninstallStep = usPostUninstall then
+  TmpBat := ExpandConstant('{tmp}\cleanup-vegaconnect.bat');
+  if CurUninstallStep = usUninstall then
   begin
-    ExtractTemporaryFile('cleanup-vegaconnect.bat');
-    BatPath := ExpandConstant('{tmp}\cleanup-vegaconnect.bat');
-    Exec(
-      ExpandConstant('{cmd}'),
-      '/c ""' + BatPath + '" --silent"',
-      '',
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode
-    );
+    SrcBat := ExpandConstant('{app}\cleanup-vegaconnect.bat');
+    if FileExists(SrcBat) then
+      FileCopy(SrcBat, TmpBat, False);
+  end
+  else if CurUninstallStep = usPostUninstall then
+  begin
+    if FileExists(TmpBat) then
+      Exec(
+        ExpandConstant('{cmd}'),
+        '/c ""' + TmpBat + '" --silent"',
+        '',
+        SW_HIDE,
+        ewWaitUntilTerminated,
+        ResultCode
+      );
   end;
 end;
