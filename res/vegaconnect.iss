@@ -1,13 +1,14 @@
-; VegaConnect Inno Setup script
+﻿; VegaConnect Inno Setup script
 ; Build via: ISCC.exe res\vegaconnect.iss
 ; Requires: flutter build windows --release (done beforehand)
+; Encoding: UTF-8 with BOM (required for Cyrillic in [Tasks]/[Messages]).
 
 #define AppName "VegaConnect"
 #define AppVersion "1.5.0"
 #define AppPublisher "Vega IT"
 #define AppURL "https://connect.vega-it.ru"
 #define AppExeName "vegaconnect.exe"
-#define SourceDir "..\flutter\build\windows\x64\runner\Release"
+#define BuildDir "..\flutter\build\windows\x64\runner\Release"
 #define OutputDir "..\dist"
 
 [Setup]
@@ -39,11 +40,16 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
+; VegaConnect: русский текст хранится в UTF-8 BOM, иначе Inno Setup читает его как CP1251.
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "autostart"; Description: "Запускать VegaConnect при входе в систему"; GroupDescription: "Автозапуск:"; Flags: unchecked
 
 [Files]
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; VegaConnect: основной payload клиента.
+Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; VegaConnect: cleanup-vegaconnect.bat запаковывается, но НЕ копируется на диск при установке.
+; Извлекается во временную папку и запускается деинсталлятором (см. [Code] ниже).
+Source: "cleanup-vegaconnect.bat"; Flags: dontcopy
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
@@ -56,3 +62,31 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
+
+[Code]
+{ VegaConnect: после штатного удаления Inno Setup запускаем cleanup-vegaconnect.bat
+  в --silent режиме. Скрипт добивает то, о чём Inno не знает:
+    - старые папки %APPDATA%\RustDesk, %LOCALAPPDATA%\RustDesk, Program Files\RustDesk;
+    - ярлыки на перенесённых рабочих столах (Shell Folders) и OneDrive;
+    - записи RustDesk и VegaConnect в Uninstall, Software, Run, Services;
+    - службы, firewall-правила, scheduled tasks.
+  См. res/cleanup-vegaconnect.bat. }
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  ResultCode: Integer;
+  BatPath: String;
+begin
+  if CurUninstallStep = usPostUninstall then
+  begin
+    ExtractTemporaryFile('cleanup-vegaconnect.bat');
+    BatPath := ExpandConstant('{tmp}\cleanup-vegaconnect.bat');
+    Exec(
+      ExpandConstant('{cmd}'),
+      '/c ""' + BatPath + '" --silent"',
+      '',
+      SW_HIDE,
+      ewWaitUntilTerminated,
+      ResultCode
+    );
+  end;
+end;
