@@ -22,6 +22,7 @@ AppUpdatesURL={#AppURL}
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
+InfoBeforeFile=NOTICE.txt
 LicenseFile=..\LICENCE
 OutputDir={#OutputDir}
 OutputBaseFilename=VegaConnect-Setup-{#AppVersion}
@@ -47,8 +48,8 @@ Name: "autostart"; Description: "Запускать VegaConnect при вход�
 [Files]
 ; VegaConnect: основной payload клиента.
 Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; VegaConnect: cleanup-vegaconnect.bat запаковывается, но НЕ копируется на диск при установке.
-; Извлекается во временную папку и запускается деинсталлятором (см. [Code] ниже).
+; VegaConnect: cleanup-vegaconnect.bat кладётся в {app}. При удалении Inno
+; копирует его в {tmp} на шаге usUninstall и запускает на usPostUninstall (см. [Code]).
 Source: "cleanup-vegaconnect.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

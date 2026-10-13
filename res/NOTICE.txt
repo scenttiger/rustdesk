@@ -1,0 +1,66 @@
+﻿VegaConnect — модифицированный форк RustDesk
+============================================
+
+Продукт: VegaConnect (клиент удалённого рабочего стола)
+Распространитель: Vega IT, https://connect.vega-it.ru
+Исходный код форка: https://github.com/scenttiger/vegaconnect-client
+Исходный код вышестоящего проекта: https://github.com/rustdesk/rustdesk
+
+Настоящая программа является модифицированной версией RustDesk.
+RustDesk распространяется под лицензией GNU Affero General Public
+License v3 (AGPL-3.0). Настоящая модификация распространяется под
+той же лицензией. Полный текст AGPL-3.0 приведён ниже (страница
+"Лицензионное соглашение").
+
+Основные модификации, внесённые в эту версию
+--------------------------------------------
+1. Ребрендинг: имя приложения изменено на "VegaConnect" (используется
+   в путях установки, именах служб, ярлыках, файлах конфигурации,
+   реестре и пользовательском интерфейсе).
+2. Собственный сервер-посредник и публичный ключ (RENDEZVOUS_SERVERS,
+   RS_PUB_KEY в libs/hbb_common/src/config.rs).
+3. Интеграция с платформой VegaConnect (connect.vega-it.ru): heartbeat,
+   учёт активных исходящих сессий, механизм биллинга.
+4. Собственная иконка, шаблон установщика (Inno Setup), установочный
+   скрипт очистки следов при удалении.
+5. Внесены сопутствующие изменения в код клиента и UI.
+
+ВНИМАНИЕ: Полный список изменений доступен в истории коммитов
+указанного выше репозитория.
+
+Никакие условия лицензии AGPL-3.0 не нарушены: исходный код этой
+модифицированной версии доступен по ссылке выше.
+
+------------------------------------------------------------------------
+
+VegaConnect — a modified fork of RustDesk
+==========================================
+
+Product: VegaConnect (remote desktop client)
+Distributor: Vega IT, https://connect.vega-it.ru
+Fork source code: https://github.com/scenttiger/vegaconnect-client
+Upstream source code: https://github.com/rustdesk/rustdesk
+
+This program is a modified version of RustDesk. RustDesk is distributed
+under the GNU Affero General Public License v3 (AGPL-3.0). This
+modification is distributed under the same license. The full AGPL-3.0
+text is presented below (see the license agreement page).
+
+Summary of modifications in this version
+----------------------------------------
+1. Rebranding: application name changed to "VegaConnect" (used in
+   installation paths, service names, shortcuts, config file names,
+   registry keys, and UI strings).
+2. Custom rendezvous server and public key (RENDEZVOUS_SERVERS,
+   RS_PUB_KEY in libs/hbb_common/src/config.rs).
+3. Integration with the VegaConnect platform (connect.vega-it.ru):
+   heartbeat, outgoing session accounting, billing mechanism.
+4. Custom icon, installer template (Inno Setup), and an uninstall-time
+   cleanup script.
+5. Related changes in client code and UI.
+
+NOTE: The full changelog is available in the commit history of the
+repository listed above.
+
+No terms of AGPL-3.0 are violated: the source code of this modified
+version is available at the link above.
