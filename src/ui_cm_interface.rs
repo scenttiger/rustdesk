@@ -177,6 +177,39 @@ lazy_static::lazy_static! {
 
 static CLICK_TIME: AtomicI64 = AtomicI64::new(0);
 
+/// VegaConnect: список ID активных ИСХОДЯЩИХ сессий управляющего клиента
+/// (к каким удалённым ПК мы сейчас подключены).
+///
+/// Используется в heartbeat (src/hbbs_http/sync.rs) — account-api на своей
+/// стороне считает длину этого списка и сравнивает с лимитом одновременных
+/// подключений по подписке пользователя. Если лимит превышен, сервер
+/// возвращает `disconnect: [id...]` в ответе heartbeat, и клиент разрывает
+/// указанные сессии тем же механизмом, что и для `conns`.
+///
+/// Отличие от `Connection::alive_conns()` (ВХОДЯЩИЕ к нам): здесь именно
+/// сессии, которые инициировали МЫ. Именно их лимитирует биллинг.
+///
+/// Фильтр оставляет только реальные удалённые рабочие сессии:
+///  - authorized && !disconnected  — сессия авторизована и жива;
+///  - !is_file_transfer            — не отдельный канал передачи файлов;
+///  - !is_view_camera              — не просмотр камеры;
+///  - port_forward.is_empty()      — не только туннель портов.
+pub fn alive_outgoing_conn_ids() -> Vec<i32> {
+    CLIENTS
+        .read()
+        .unwrap()
+        .values()
+        .filter(|c| {
+            c.authorized
+                && !c.disconnected
+                && !c.is_file_transfer
+                && !c.is_view_camera
+                && c.port_forward.is_empty()
+        })
+        .map(|c| c.id)
+        .collect()
+}
+
 #[derive(Clone)]
 pub struct ConnectionManager<T: InvokeUiCM> {
     pub ui_handler: T,

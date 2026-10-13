@@ -58,3 +58,9 @@ libsciter.dylib
 flutter/web/
 # libdrmtap is cloned at build time by build.py (not a submodule)
 /third_party/libdrmtap/
+
+# VegaConnect: backups, recon dumps and any temporary scratch files
+*.bak-*
+*-recon*.txt
+install-recon*.txt
+outgoing-conns-recon*.txt

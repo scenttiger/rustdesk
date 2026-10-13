@@ -240,6 +240,18 @@ async fn start_hbbs_sync_async() {
                 if !conns.is_empty() {
                     v["conns"] = json!(conns);
                 }
+                // VegaConnect: сообщаем серверу список активных ИСХОДЯЩИХ сессий
+                // (к каким удалённым ПК мы сейчас подключены). Это НЕ `conns`
+                // выше — те описывают ВХОДЯЩИЕ подключения к нам. account-api
+                // сравнивает len(outgoing_conns) с лимитом по подписке и при
+                // превышении возвращает `disconnect: [id...]`, который ниже
+                // обрабатывается тем же механизмом, что и для `conns`.
+                // См. ui_cm_interface::alive_outgoing_conn_ids.
+                let outgoing = crate::ui_cm_interface::alive_outgoing_conn_ids();
+                if !outgoing.is_empty() {
+                    v["outgoing_conns"] = json!(outgoing);
+                }
+
                 let modified_at = LocalConfig::get_option("strategy_timestamp").parse::<i64>().unwrap_or(0);
                 v["modified_at"] = json!(modified_at);
                 let response = crate::post_request(url.clone(), v.to_string(), "").await;

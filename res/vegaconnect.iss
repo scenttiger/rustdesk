@@ -63,6 +63,21 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
 
+[Registry]
+; VegaConnect: клиент ищет себя через get_install_info() -> реестр.
+; Inno Setup по умолчанию пишет Uninstall-запись только под {GUID}, а клиент
+; ищет Software\{#AppName}\InstallState\{#AppName} и Uninstall\{#AppName}.
+; Без этих ключей is_installed() возвращает false при установке в нестандартный
+; путь, и пользователю показывается кнопка "Установить" (которая дополнительно
+; создаёт .lnk, минуя наш installer).
+Root: HKLM; Subkey: "Software\{#AppName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#AppName}\InstallState\{#AppName}"; ValueType: string; ValueName: "InstallLocation"; ValueData: "{app}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "InstallLocation"; ValueData: "{app}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "DisplayName"; ValueData: "{#AppName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "DisplayVersion"; ValueData: "{#AppVersion}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "Publisher"; ValueData: "{#AppPublisher}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\{#AppExeName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "UninstallString"; ValueData: """{uninstallexe}"""; Flags: uninsdeletekey
 [Code]
 { VegaConnect: после штатного удаления Inno Setup запускаем cleanup-vegaconnect.bat
   в --silent режиме. Скрипт добивает то, о чём Inno не знает:
