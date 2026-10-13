@@ -64,3 +64,5 @@ flutter/web/
 *-recon*.txt
 install-recon*.txt
 outgoing-conns-recon*.txt
+# Handoffs moved to private vegaconnect-internal repo
+HANDOFF_*.md
