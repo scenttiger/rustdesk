@@ -10,6 +10,15 @@
 #define AppExeName "vegaconnect.exe"
 #define BuildDir "..\flutter\build\windows\x64\runner\Release"
 #define OutputDir "..\dist"
+; VegaConnect: BUILD_DATE в реестре должен быть в том же формате, что
+; hbb_common::gen_version (chrono "%Y-%m-%d %H:%M"). Клиент
+; is_installed_lower_version() (ui_interface.rs) читает это значение из
+; Software\<app>\InstallState\<app> и сравнивает лексикографически со
+; своим BUILD_DATE. Пустое значение => BUILD_DATE > "" => true =>
+; ложное "установлена более поздняя версия". ISCC выполняется уже
+; после cargo build, поэтому штамп ISPP всегда >= BUILD_DATE бинаря,
+; и сравнение даёт false.
+#define BuildDate GetDateTimeString('yyyy-mm-dd HH:nn', '-', ':')
 
 [Setup]
 AppId={{7B3E9F1A-4C2D-4E8B-9A1F-1E5C3B7D2A44}
@@ -34,7 +43,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
 UninstallDisplayIcon={app}\{#AppExeName}
-UninstallDisplayName={#AppName} {#AppVersion}
+UninstallDisplayName={#AppName}
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
@@ -65,20 +74,31 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(
 Type: filesandordirs; Name: "{app}"
 
 [Registry]
-; VegaConnect: клиент ищет себя через get_install_info() -> реестр.
-; Inno Setup по умолчанию пишет Uninstall-запись только под {GUID}, а клиент
-; ищет Software\{#AppName}\InstallState\{#AppName} и Uninstall\{#AppName}.
-; Без этих ключей is_installed() возвращает false при установке в нестандартный
-; путь, и пользователю показывается кнопка "Установить" (которая дополнительно
-; создаёт .lnk, минуя наш installer).
+; VegaConnect: клиент ищет себя через get_valid_subkey() (src\platform\windows.rs).
+; Порядок поиска:
+;   1) HKLM\Software\<app>\InstallState\<app>                       <- нам достаточно
+;   2) HKLM\Software\Classes\Installer\Products\<GUID>              (MSI, не используем)
+;   3) HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\<app> (wow / non-wow)
+;
+; Мы пишем ТОЛЬКО ветку (1). Дополнительная запись в Uninstall\<app>
+; НЕ нужна и создаёт дубль в "Установка и удаление программ":
+; Inno Setup уже создаёт свою запись под AppId={{GUID}}.
+;
+; BuildDate обязателен: is_installed_lower_version() читает его из того же
+; subkey и сравнивает со своим BUILD_DATE. Без него get_reg() вернёт "",
+; и клиент покажет "установлена более поздняя версия".
+;
+; Строка с deletekey — разовая уборка: у пользователей, ставивших предыдущую
+; (сломанную) сборку, остался ключ Uninstall\VegaConnect. Сносим его при
+; установке. Ключ не создаётся, только удаляется.
+
 Root: HKLM; Subkey: "Software\{#AppName}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\{#AppName}\InstallState\{#AppName}"; ValueType: string; ValueName: "InstallLocation"; ValueData: "{app}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "InstallLocation"; ValueData: "{app}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "DisplayName"; ValueData: "{#AppName}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "DisplayVersion"; ValueData: "{#AppVersion}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "Publisher"; ValueData: "{#AppPublisher}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\{#AppExeName}"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; ValueType: string; ValueName: "UninstallString"; ValueData: """{uninstallexe}"""; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#AppName}\InstallState\{#AppName}"; ValueType: string; ValueName: "InstallLocation"; ValueData: "{app}";            Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#AppName}\InstallState\{#AppName}"; ValueType: string; ValueName: "BuildDate";       ValueData: "{#BuildDate}";    Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#AppName}\InstallState\{#AppName}"; ValueType: string; ValueName: "DisplayVersion";  ValueData: "{#AppVersion}";   Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#AppName}\InstallState\{#AppName}"; ValueType: string; ValueName: "Publisher";       ValueData: "{#AppPublisher}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#AppName}"; Flags: deletekey
+
 [Code]
 { VegaConnect: после штатного удаления Inno Setup запускаем cleanup-vegaconnect.bat
   в --silent режиме. Скрипт добивает то, о чём Inno не знает:
